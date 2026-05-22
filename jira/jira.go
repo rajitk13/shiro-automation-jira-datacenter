@@ -24,12 +24,6 @@ type ModuleMetadata struct {
 	OutputSchema map[string]SchemaField `json:"output_schema"`
 }
 
-// Step mirrors the config-bearing part of workflow.Step from shiro-automation.
-// Shiro passes a workflow.Step as interface{} to Run; we extract Config via type assertion.
-type Step struct {
-	Config map[string]interface{}
-}
-
 // JiraModule implements the Shiro modules.Module interface for Jira Data Center.
 // Credentials are read from environment variables:
 //
@@ -45,8 +39,7 @@ func NewJiraModule() *JiraModule {
 }
 
 // Run executes a Jira operation. The operation is read from step.Config["operation"].
-// Shiro calls this as module.Run(ctx, execCtx, step) where step is a workflow.Step.
-// We extract Config via reflection-free struct field access using an anonymous struct cast.
+// Shiro passes a workflow.Step as interface{}; Config is extracted via reflection.
 func (m *JiraModule) Run(ctx context.Context, stepCtx interface{}, step interface{}) (map[string]interface{}, error) {
 	cfg, err := extractConfig(step)
 	if err != nil {
