@@ -2,7 +2,7 @@ name: jira
 type: builtin
 description: Jira Data Center integration for Shiro — create issues, add comments, transition, search via JQL
 version: 1.0.0
-source: https://github.com/rajitk13/shiro-jira-module
-docs: https://github.com/rajitk13/shiro-jira-module/blob/main/README.md
-package: github.com/rajitk13/shiro-jira-module/jira
+source: https://github.com/rajitk13/shiro-automation-jira-datacenter
+docs: https://github.com/rajitk13/shiro-automation-jira-datacenter/blob/main/README.md
+package: github.com/rajitk13/shiro-automation-jira-datacenter/jira
 factory: NewJiraModule
