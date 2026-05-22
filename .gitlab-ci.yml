@@ -1,0 +1,31 @@
+stages:
+  - prepare
+  - run
+
+variables:
+  JIRA_BASE_URL: "https://jira.corp.example.com"
+
+start-jira-module:
+  stage: prepare
+  image: golang:1.21
+  script:
+    - go build -o shiro-jira-module .
+    - ./shiro-jira-module &
+    - sleep 3
+  artifacts:
+    paths:
+      - shiro-jira-module
+
+shiro-workflow:
+  stage: run
+  image: golang:1.21
+  needs: [start-jira-module]
+  script:
+    - ./shiro-jira-module &
+    - sleep 2
+    - shiro add module github.com/rajitk13/shiro-jira-module
+    - shiro run .shiro/workflow.json
+  variables:
+    JIRA_BASE_URL: $JIRA_BASE_URL
+    JIRA_USERNAME: $JIRA_USERNAME
+    JIRA_API_TOKEN: $JIRA_API_TOKEN
