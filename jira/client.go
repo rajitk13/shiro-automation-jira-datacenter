@@ -11,20 +11,19 @@ import (
 	"time"
 )
 
-// Client is a Jira Data Center REST API v2 client
+// Client is a Jira Data Center REST API v2 client authenticated via PAT Bearer token
 type Client struct {
 	baseURL    string
-	username   string
-	apiToken   string
+	pat        string
 	httpClient *http.Client
 }
 
-// NewClient creates a new Jira client using basic auth (username + API token / password)
-func NewClient(baseURL, username, apiToken string) *Client {
+// NewClient creates a new Jira DC client using a Personal Access Token (PAT).
+// The PAT is sent as a Bearer token — no username required.
+func NewClient(baseURL, pat string) *Client {
 	return &Client{
-		baseURL:  strings.TrimRight(baseURL, "/"),
-		username: username,
-		apiToken: apiToken,
+		baseURL: strings.TrimRight(baseURL, "/"),
+		pat:     pat,
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -293,7 +292,7 @@ func (c *Client) doRequestNoResponse(method, path string, body interface{}) erro
 	return nil
 }
 
-// sendRequest builds and executes the HTTP request with basic auth.
+// sendRequest builds and executes the HTTP request with Bearer token auth.
 func (c *Client) sendRequest(method, path string, body interface{}) (*http.Response, error) {
 	var reqBody io.Reader
 	if body != nil {
@@ -309,7 +308,7 @@ func (c *Client) sendRequest(method, path string, body interface{}) (*http.Respo
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
-	req.SetBasicAuth(c.username, c.apiToken)
+	req.Header.Set("Authorization", "Bearer "+c.pat)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 

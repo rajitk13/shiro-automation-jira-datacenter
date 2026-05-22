@@ -47,16 +47,12 @@ func (m *JiraModule) Run(ctx context.Context, stepCtx interface{}, step interfac
 	}
 
 	baseURL := os.Getenv("JIRA_BASE_URL")
-	username := os.Getenv("JIRA_USERNAME")
-	apiToken := os.Getenv("JIRA_API_TOKEN")
+	pat := os.Getenv("JIRA_API_TOKEN")
 
 	if baseURL == "" {
 		return nil, fmt.Errorf("JIRA_BASE_URL environment variable is required")
 	}
-	if username == "" {
-		return nil, fmt.Errorf("JIRA_USERNAME environment variable is required")
-	}
-	if apiToken == "" {
+	if pat == "" {
 		return nil, fmt.Errorf("JIRA_API_TOKEN environment variable is required")
 	}
 
@@ -65,7 +61,7 @@ func (m *JiraModule) Run(ctx context.Context, stepCtx interface{}, step interfac
 		return nil, fmt.Errorf("operation is required in step config")
 	}
 
-	client := NewClient(baseURL, username, apiToken)
+	client := NewClient(baseURL, pat)
 
 	switch operation {
 	case "create_issue":
@@ -102,7 +98,7 @@ func (m *JiraModule) Metadata() ModuleMetadata {
 			"jql":           {Type: "string", Description: "JQL query — required for search_issues"},
 			"priority":      {Type: "string", Description: "Issue priority (High, Medium, Low)"},
 			"labels":        {Type: "string", Description: "Comma-separated labels"},
-			"assignee":      {Type: "string", Description: "Username of the assignee"},
+			"assignee":      {Type: "string", Description: "Account ID or username of the assignee"},
 		},
 		OutputSchema: map[string]SchemaField{
 			"issue_key":  {Type: "string", Description: "Jira issue key (e.g. DEV-42)"},

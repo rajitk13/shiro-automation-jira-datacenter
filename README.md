@@ -21,11 +21,10 @@ No proxy server required — this module talks directly to Jira Data Center usin
 
 ## Environment Variables
 
-| Variable         | Required | Description                              |
-|------------------|----------|------------------------------------------|
-| `JIRA_BASE_URL`  | yes      | Base URL of your Jira instance           |
-| `JIRA_USERNAME`  | yes      | Jira username                            |
-| `JIRA_API_TOKEN` | yes      | API token or password for basic auth     |
+| Variable         | Required | Description                                        |
+|------------------|----------|----------------------------------------------------|
+| `JIRA_BASE_URL`  | yes      | Base URL of your Jira instance                     |
+| `JIRA_API_TOKEN` | yes      | Personal Access Token (PAT) — sent as Bearer token |
 
 ## Supported Operations
 
