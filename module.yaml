@@ -5,4 +5,3 @@ version: 1.0.0
 source: https://github.com/rajitk13/shiro-automation-jira-datacenter
 docs: https://github.com/rajitk13/shiro-automation-jira-datacenter/blob/main/README.md
 binary: shiro-jira
-artifact_url: https://github.com/rajitk13/shiro-automation-jira-datacenter/releases/latest/download/shiro-jira
