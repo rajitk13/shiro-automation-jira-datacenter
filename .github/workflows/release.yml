@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build binaries
+        run: |
+          mkdir -p dist
+          GOOS=linux GOARCH=amd64 go build -o dist/shiro-jira-linux-amd64 ./cmd
+          GOOS=linux GOARCH=arm64 go build -o dist/shiro-jira-linux-arm64 ./cmd
+          GOOS=darwin GOARCH=amd64 go build -o dist/shiro-jira-darwin-amd64 ./cmd
+          GOOS=darwin GOARCH=arm64 go build -o dist/shiro-jira-darwin-arm64 ./cmd
+          GOOS=windows GOARCH=amd64 go build -o dist/shiro-jira-windows-amd64.exe ./cmd
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+          draft: false
+          prerelease: false
