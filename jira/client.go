@@ -21,6 +21,10 @@ type Client struct {
 // NewClient creates a new Jira DC client using a Personal Access Token (PAT).
 // The PAT is sent as a Bearer token — no username required.
 func NewClient(baseURL, pat string) *Client {
+	// Ensure baseURL has a protocol prefix
+	if baseURL != "" && !strings.HasPrefix(baseURL, "http://") && !strings.HasPrefix(baseURL, "https://") {
+		baseURL = "https://" + baseURL
+	}
 	return &Client{
 		baseURL: strings.TrimRight(baseURL, "/"),
 		pat:     pat,
