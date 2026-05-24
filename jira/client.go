@@ -254,6 +254,140 @@ func (c *Client) SearchIssues(cfg map[string]interface{}) (map[string]interface{
 	}, nil
 }
 
+// GetUser retrieves information about a Jira user.
+// Required config keys: username (or account_id)
+func (c *Client) GetUser(cfg map[string]interface{}) (map[string]interface{}, error) {
+	username := stringField(cfg, "username")
+	accountID := stringField(cfg, "account_id")
+
+	var endpoint string
+	if username != "" {
+		endpoint = fmt.Sprintf("/rest/api/2/user?username=%s", url.QueryEscape(username))
+	} else if accountID != "" {
+		endpoint = fmt.Sprintf("/rest/api/2/user?accountId=%s", url.QueryEscape(accountID))
+	} else {
+		return nil, fmt.Errorf("username or account_id is required for get_user")
+	}
+
+	var result map[string]interface{}
+	if err := c.doRequest("GET", endpoint, nil, &result); err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"user": result,
+		"data": result,
+	}, nil
+}
+
+// GetUserGroups retrieves the groups a user belongs to.
+// Required config keys: username (or account_id)
+func (c *Client) GetUserGroups(cfg map[string]interface{}) (map[string]interface{}, error) {
+	username := stringField(cfg, "username")
+	accountID := stringField(cfg, "account_id")
+
+	var endpoint string
+	if username != "" {
+		endpoint = fmt.Sprintf("/rest/api/2/user?username=%s&expand=groups", url.QueryEscape(username))
+	} else if accountID != "" {
+		endpoint = fmt.Sprintf("/rest/api/2/user?accountId=%s&expand=groups", url.QueryEscape(accountID))
+	} else {
+		return nil, fmt.Errorf("username or account_id is required for get_user_groups")
+	}
+
+	var result map[string]interface{}
+	if err := c.doRequest("GET", endpoint, nil, &result); err != nil {
+		return nil, err
+	}
+
+	groups := []map[string]interface{}{}
+	if groupsData, ok := result["groups"].(map[string]interface{}); ok {
+		if items, ok := groupsData["items"].([]interface{}); ok {
+			for _, item := range items {
+				if group, ok := item.(map[string]interface{}); ok {
+					groups = append(groups, group)
+				}
+			}
+		}
+	}
+
+	return map[string]interface{}{
+		"groups": groups,
+		"data":   result,
+	}, nil
+}
+
+// AddUserToGroup adds a user to a Jira group (requires admin permissions).
+// Required config keys: username (or account_id), group_name
+func (c *Client) AddUserToGroup(cfg map[string]interface{}) (map[string]interface{}, error) {
+	username := stringField(cfg, "username")
+	accountID := stringField(cfg, "account_id")
+	groupName := stringField(cfg, "group_name")
+
+	if groupName == "" {
+		return nil, fmt.Errorf("group_name is required for add_user_to_group")
+	}
+	if username == "" && accountID == "" {
+		return nil, fmt.Errorf("username or account_id is required for add_user_to_group")
+	}
+
+	// First get the group by name
+	groupEndpoint := fmt.Sprintf("/rest/api/2/group?groupname=%s", url.QueryEscape(groupName))
+	var group map[string]interface{}
+	if err := c.doRequest("GET", groupEndpoint, nil, &group); err != nil {
+		return nil, fmt.Errorf("failed to find group: %w", err)
+	}
+
+	// Add user to group
+	body := map[string]interface{}{}
+	if username != "" {
+		body["name"] = username
+	} else {
+		body["accountId"] = accountID
+	}
+
+	var result map[string]interface{}
+	if err := c.doRequest("POST", fmt.Sprintf("/rest/api/2/group/user?groupname=%s", url.QueryEscape(groupName)), body, &result); err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"success": true,
+		"group":   groupName,
+		"user":    result,
+	}, nil
+}
+
+// GetGroupMembers retrieves members of a Jira group.
+// Required config keys: group_name
+func (c *Client) GetGroupMembers(cfg map[string]interface{}) (map[string]interface{}, error) {
+	groupName := stringField(cfg, "group_name")
+	if groupName == "" {
+		return nil, fmt.Errorf("group_name is required for get_group_members")
+	}
+
+	endpoint := fmt.Sprintf("/rest/api/2/group/member?groupname=%s", url.QueryEscape(groupName))
+
+	var result map[string]interface{}
+	if err := c.doRequest("GET", endpoint, nil, &result); err != nil {
+		return nil, err
+	}
+
+	members := []map[string]interface{}{}
+	if values, ok := result["values"].([]interface{}); ok {
+		for _, item := range values {
+			if member, ok := item.(map[string]interface{}); ok {
+				members = append(members, member)
+			}
+		}
+	}
+
+	return map[string]interface{}{
+		"members": members,
+		"data":    result,
+	}, nil
+}
+
 // doRequest sends an HTTP request and decodes the JSON response body into out.
 func (c *Client) doRequest(method, path string, body interface{}, out interface{}) error {
 	resp, err := c.sendRequest(method, path, body)

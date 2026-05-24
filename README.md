@@ -77,6 +77,40 @@ No proxy server required — this module talks directly to Jira Data Center usin
 |-------|----------|---------------------|
 | `jql` | yes      | JQL query string    |
 
+### `get_user`
+
+| Field      | Required | Description                                     |
+|------------|----------|-------------------------------------------------|
+| `username` | yes*     | Jira username (alternative: account_id)         |
+| `account_id`| yes*     | Jira account ID (alternative: username)         |
+
+*Either `username` or `account_id` is required.
+
+### `get_user_groups`
+
+| Field      | Required | Description                                     |
+|------------|----------|-------------------------------------------------|
+| `username` | yes*     | Jira username (alternative: account_id)         |
+| `account_id`| yes*     | Jira account ID (alternative: username)         |
+
+*Either `username` or `account_id` is required.
+
+### `add_user_to_group` (requires admin permissions)
+
+| Field      | Required | Description                                     |
+|------------|----------|-------------------------------------------------|
+| `username` | yes*     | Jira username (alternative: account_id)         |
+| `account_id`| yes*     | Jira account ID (alternative: username)         |
+| `group_name`| yes     | Jira group name to add user to                  |
+
+*Either `username` or `account_id` is required.
+
+### `get_group_members`
+
+| Field       | Required | Description          |
+|-------------|----------|----------------------|
+| `group_name`| yes      | Jira group name      |
+
 ## Workflow Example
 
 ```json

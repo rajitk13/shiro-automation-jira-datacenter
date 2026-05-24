@@ -35,9 +35,9 @@ func main() {
 		resp := SubprocessResponse{
 			Output: map[string]interface{}{
 				"name":        "jira",
-				"description": "Jira Data Center integration — create/get/update issues, add comments, transition status, search via JQL",
+				"description": "Jira Data Center integration — create/get/update issues, add comments, transition status, search via JQL, user and group management",
 				"input_schema": map[string]interface{}{
-					"operation":     map[string]interface{}{"type": "string", "description": "Operation: create_issue, get_issue, update_issue, add_comment, transition_issue, search_issues", "required": true},
+					"operation":     map[string]interface{}{"type": "string", "description": "Operation: create_issue, get_issue, update_issue, add_comment, transition_issue, search_issues, get_user, get_user_groups, add_user_to_group, get_group_members", "required": true},
 					"project":       map[string]interface{}{"type": "string", "description": "Jira project key (e.g. DEV) — required for create_issue"},
 					"summary":       map[string]interface{}{"type": "string", "description": "Issue summary / title — required for create_issue"},
 					"description":   map[string]interface{}{"type": "string", "description": "Issue description"},
@@ -49,6 +49,9 @@ func main() {
 					"priority":      map[string]interface{}{"type": "string", "description": "Issue priority (High, Medium, Low)"},
 					"labels":        map[string]interface{}{"type": "string", "description": "Comma-separated labels"},
 					"assignee":      map[string]interface{}{"type": "string", "description": "Account ID or username of the assignee"},
+					"username":      map[string]interface{}{"type": "string", "description": "Jira username — required for get_user, get_user_groups, add_user_to_group"},
+					"account_id":    map[string]interface{}{"type": "string", "description": "Jira account ID — alternative to username for get_user, get_user_groups, add_user_to_group"},
+					"group_name":    map[string]interface{}{"type": "string", "description": "Jira group name — required for add_user_to_group, get_group_members"},
 				},
 				"output_schema": map[string]interface{}{
 					"issue_key":  map[string]interface{}{"type": "string", "description": "Jira issue key (e.g. DEV-42)"},
@@ -57,6 +60,10 @@ func main() {
 					"comment_id": map[string]interface{}{"type": "string", "description": "ID of the created comment (add_comment only)"},
 					"total":      map[string]interface{}{"type": "number", "description": "Total results count (search_issues only)"},
 					"data":       map[string]interface{}{"type": "object", "description": "Full issue or search result payload from Jira API"},
+					"user":       map[string]interface{}{"type": "object", "description": "User information (get_user only)"},
+					"groups":     map[string]interface{}{"type": "array", "description": "List of groups (get_user_groups only)"},
+					"members":    map[string]interface{}{"type": "array", "description": "List of group members (get_group_members only)"},
+					"success":    map[string]interface{}{"type": "boolean", "description": "Operation success flag (add_user_to_group only)"},
 				},
 			},
 		}

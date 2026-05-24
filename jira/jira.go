@@ -76,8 +76,16 @@ func (m *JiraModule) Run(ctx context.Context, stepCtx interface{}, step interfac
 		return client.TransitionIssue(cfg)
 	case "search_issues":
 		return client.SearchIssues(cfg)
+	case "get_user":
+		return client.GetUser(cfg)
+	case "get_user_groups":
+		return client.GetUserGroups(cfg)
+	case "add_user_to_group":
+		return client.AddUserToGroup(cfg)
+	case "get_group_members":
+		return client.GetGroupMembers(cfg)
 	default:
-		return nil, fmt.Errorf("unknown jira operation: %s (supported: create_issue, get_issue, update_issue, add_comment, transition_issue, search_issues)", operation)
+		return nil, fmt.Errorf("unknown jira operation: %s (supported: create_issue, get_issue, update_issue, add_comment, transition_issue, search_issues, get_user, get_user_groups, add_user_to_group, get_group_members)", operation)
 	}
 }
 
@@ -85,9 +93,9 @@ func (m *JiraModule) Run(ctx context.Context, stepCtx interface{}, step interfac
 func (m *JiraModule) Metadata() ModuleMetadata {
 	return ModuleMetadata{
 		Name:        "jira",
-		Description: "Jira Data Center integration — create/get/update issues, add comments, transition status, search via JQL",
+		Description: "Jira Data Center integration — create/get/update issues, add comments, transition status, search via JQL, user and group management",
 		InputSchema: map[string]SchemaField{
-			"operation":     {Type: "string", Description: "Operation: create_issue, get_issue, update_issue, add_comment, transition_issue, search_issues", Required: true},
+			"operation":     {Type: "string", Description: "Operation: create_issue, get_issue, update_issue, add_comment, transition_issue, search_issues, get_user, get_user_groups, add_user_to_group, get_group_members", Required: true},
 			"project":       {Type: "string", Description: "Jira project key (e.g. DEV) — required for create_issue"},
 			"summary":       {Type: "string", Description: "Issue summary / title — required for create_issue"},
 			"description":   {Type: "string", Description: "Issue description"},
@@ -99,6 +107,9 @@ func (m *JiraModule) Metadata() ModuleMetadata {
 			"priority":      {Type: "string", Description: "Issue priority (High, Medium, Low)"},
 			"labels":        {Type: "string", Description: "Comma-separated labels"},
 			"assignee":      {Type: "string", Description: "Account ID or username of the assignee"},
+			"username":      {Type: "string", Description: "Jira username — required for get_user, get_user_groups, add_user_to_group"},
+			"account_id":    {Type: "string", Description: "Jira account ID — alternative to username for get_user, get_user_groups, add_user_to_group"},
+			"group_name":    {Type: "string", Description: "Jira group name — required for add_user_to_group, get_group_members"},
 		},
 		OutputSchema: map[string]SchemaField{
 			"issue_key":  {Type: "string", Description: "Jira issue key (e.g. DEV-42)"},
@@ -107,6 +118,10 @@ func (m *JiraModule) Metadata() ModuleMetadata {
 			"comment_id": {Type: "string", Description: "ID of the created comment (add_comment only)"},
 			"total":      {Type: "number", Description: "Total results count (search_issues only)"},
 			"data":       {Type: "object", Description: "Full issue or search result payload from Jira API"},
+			"user":       {Type: "object", Description: "User information (get_user only)"},
+			"groups":     {Type: "array", Description: "List of groups (get_user_groups only)"},
+			"members":    {Type: "array", Description: "List of group members (get_group_members only)"},
+			"success":    {Type: "boolean", Description: "Operation success flag (add_user_to_group only)"},
 		},
 	}
 }
